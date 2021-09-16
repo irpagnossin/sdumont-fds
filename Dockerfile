@@ -41,7 +41,10 @@ RUN MKL_ROOT=/opt/intel/oneapi/mkl/2021.3.0 \
     . /opt/intel/oneapi/setvars.sh &&\
     ./make_fds.sh
 
-RUN cat /root/vars.sh >> ~/.bashrc
+RUN cat /root/vars.sh >> ~/.bashrc &&\
+    rm /tmp/*.sh &&\
+    rm /opt/openmpi-4.1.1.tar.gz &&\
+    rm /opt/fds.tar.gz
 
 VOLUME /root/fds/projects
 ENTRYPOINT ["/root/startup.sh"]
