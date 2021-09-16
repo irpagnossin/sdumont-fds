@@ -1,0 +1,6 @@
+#!/bin/bash
+FDS_PROJECTS=~/Documents/fds/projects
+docker run -d \
+    --mount "type=volume,src=$FDS_PROJECTS,tgt=/root/fds/projects/" \
+    --name my_fds_sandbox
+    fds_sandbox
