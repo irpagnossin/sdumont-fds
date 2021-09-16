@@ -3,7 +3,12 @@
 # Este script instala o FDS (e suas dependências) via código-fonte no cluster
 # Santos Dumont (SDumont). Ele supõe que algum compilador C++ e o make estejam
 # disponíveis no sistema. Esse é de fato o caso no SDumont, em 2021-09-16.
-
+#
+# ATENÇÃO: se você já tem instaladas as dependências, em /prj/<projeto>/opt,
+# pode pular as primeiras etapas e ir diretamente para a instalação do FDS,
+# no final do script. Não se esqueça de definir as variáveis de ambiente
+# usadas.
+#
 # Este script supõe a existência dos arquivos abaixo em
 # $INSTALLATION_FILES_FOLDER (veja preinstall.sh):
 # - l_BaseKit_p_2021.3.0.3219_offline.sh
