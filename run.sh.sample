@@ -1,6 +1,6 @@
 #!/bin/bash
-FDS_PROJECTS=~/Documents/fds/projects
+FDS_PROJECTS=$HOME/Documents/research/incendios_florestais/fds/src
 docker run -d \
-    --mount "type=volume,src=$FDS_PROJECTS,tgt=/root/fds/projects/" \
-    --name my_fds_sandbox
-    fds_sandbox
+    --name fds_sandbox \
+    --mount "type=bind,source=$FDS_PROJECTS,target=/root/fds/src" \
+    fds_sandbox:0.4.0

@@ -1,50 +1,50 @@
-FROM ubuntu:20.04 AS dependencies
-
-ENV USER=root
+# TODO: usar alpine (problema: instaladores Intel requerem bootstrap)
+FROM ubuntu:20.04 AS builder
 
 # Install gcc and make
 RUN apt update && apt install -y build-essential
 
-COPY dependencies/*.sh /tmp/
-COPY dependencies/openmpi-4.1.1.tar.gz /opt/
+#------------------------------------------
+# Intel FORTRAN compile (ifort)
+# It is installed at /opt/intel
+FROM builder AS ifort
+ENV INSTALLER=l_HPCKit_p_2021.3.0.3230_offline.sh
+COPY dependencies/$INSTALLER /tmp/
+RUN sh /tmp/$INSTALLER -s -a --action install \
+        --components default \
+        --silent --eula accept \
+    && rm /tmp/$INSTALLER
 
-# Intel FORTRAN compiler: ifort
-RUN bash /tmp/l_HPCKit_p_2021.3.0.3230_offline.sh -s -a --action install \
-    --components default --silent --eula accept
-
+#------------------------------------------
 # OpenMPI
-WORKDIR /opt/
-RUN tar -xf openmpi-4.1.1.tar.gz
-WORKDIR /opt/openmpi-4.1.1
-RUN ./configure &&\
-    make &&\
-    make install
+# It is installed at /opt/openmpi
+FROM builder AS openmpi
+COPY --from=ifort /opt /opt
+ENV TAR=openmpi-4.1.1.tar.gz
+WORKDIR /opt/openmpi/openmpi-4.1.1
+COPY dependencies/$TAR /opt/
+RUN tar -xf /opt/$TAR -C /opt/openmpi \
+    && ./configure \
+    && make \
+    && make install \
+    && rm /opt/$TAR
 
+#------------------------------------------
 # Intel Math Kernel Libraries
-# Instructions: https://software.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-with-command-line.html#install-with-command-line
-RUN bash /tmp/l_BaseKit_p_2021.3.0.3219_offline.sh -s -a --action install \
-    --components intel.oneapi.lin.mkl.devel:intel.oneapi.lin.dpcpp-cpp-compiler:intel.oneapi.lin.tbb.devel:intel.oneapi.lin.ipp.devel:intel.oneapi.lin.ccl.devel \
-    --silent --eula accept
+# It is installed at /opt/intel
+# TODO: minimizar a quantidade de componentes instalados.
+FROM builder AS mkl
+COPY --from=openmpi /opt /opt
+ENV INSTALLER=l_BaseKit_p_2021.3.0.3219_offline.sh
+COPY dependencies/$INSTALLER /tmp/
+RUN sh /tmp/$INSTALLER -s -a --action install \
+        --components intel.oneapi.lin.mkl.devel:intel.oneapi.lin.dpcpp-cpp-compiler:intel.oneapi.lin.tbb.devel:intel.oneapi.lin.ipp.devel:intel.oneapi.lin.ccl.devel \
+        --silent --eula accept \
+    && rm /tmp/$INSTALLER
 
-FROM dependencies
-
-COPY fds.tar.gz /opt
-COPY vars.sh /root
+#------------------------------------------
+FROM builder
+COPY --from=mkl /opt /opt
 COPY startup.sh /root
-
-# FDS
-WORKDIR /opt/
-RUN tar -xf fds.tar.gz
-WORKDIR /opt/fds/Build/impi_intel_linux_64
-RUN MKL_ROOT=/opt/intel/oneapi/mkl/2021.3.0 \
-    INTEL_COMPILERS_AND_LIBS=/opt/intel/oneapi/ \
-    . /opt/intel/oneapi/setvars.sh &&\
-    ./make_fds.sh
-
-RUN cat /root/vars.sh >> ~/.bashrc &&\
-    rm /tmp/*.sh &&\
-    rm /opt/openmpi-4.1.1.tar.gz &&\
-    rm /opt/fds.tar.gz
-
-VOLUME /root/fds/projects
+VOLUME /root/fds/src
 ENTRYPOINT ["/root/startup.sh"]
