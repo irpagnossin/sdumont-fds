@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# Copie este arquivo para sua $HOME, configure as variáveis de ambiente abaixo
+# e adicione a seguinte linha no seu .bashrr ou equivalente (depende do shell
+# que você usa):
+#
+# source ~/.fdsrc_localhost
+#
+# ATENÇÃO: este script pressupõe que você tenha configurado sua conexão com o
+# Santos Dumont no arquivo $HOME/.ssh/config, nomeando essa conexão de
+# "sdumont". Veja o arquivo ssh/config.sample neste repositório.
+
+# Usuário no SDumont
+SDUMONT_USERNAME=
+
+# Pasta na sua MÁQUINA LOCAL que contém os cenários de simulação do FDS
+FDS_LOCALHOST_CASES=$HOME/Documents/research/fds/cases
+
+# Pasta no SDUMONT que contém os cenários de simulação do FDS
+FDS_SDUMONT_CASES=/prj/motoretanol2/$SDUMONT_USERNAME/fds/cases
+
+fds-sync() {
+    echo "Enviando arquivos .srm e .fds para sdumont..."
+    rsync --recursive --include='*/' --include='*.srm' --include='*.fds' --exclude='*' $FDS_LOCALHOST_CASES/ sdumont:$FDS_SDUMONT_CASES/
+
+    echo "Sincronizando HOME e SCRATCH em sdumont..."
+    ssh sdumont fds-sync
+
+    echo "Copiando arquivos de saída do FDS para a máquina local..."
+    rsync --recursive --exclude='*.srm' --exclude='*.fds' sdumont:$FDS_SDUMONT_CASES/ $FDS_LOCALHOST_CASES/
+}
+
+fds-sbatch() {
+    case_name=$1
+    ssh sdumont "fds-sbatch $case_name"
+}

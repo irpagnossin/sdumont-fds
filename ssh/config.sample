@@ -1,0 +1,4 @@
+Host sdumont
+	Hostname login.sdumont.lncc.br
+	User SEU_USUÁRIO
+	IdentityFile ~/.ssh/sdumont

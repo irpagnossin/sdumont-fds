@@ -31,25 +31,29 @@ FDS_INSTALLATION_PATH=$HOME/opt
 # Intel FORTRAN compiler: ifort
 # obs.: conforme a documentação do FDS, é possível usar gfortran ao invés do
 # compilador da Intel. Porém, não obtive êxito nisso.
-mkdir -p $INTEL_PATH
-$INSTALLATION_FILES_FOLDER/l_HPCKit_p_2021.3.0.3230_offline.sh -s -a --action install \
-    --components default \
-    --install-dir $INTEL_PATH \
-    --silent --eula accept
+if [ -d $INTEL_PATH ] && [ -d $MPI_PATH]; then
+    echo "As dependências já estão instaladas."
+else
+    mkdir -p $INTEL_PATH
+    $INSTALLATION_FILES_FOLDER/l_HPCKit_p_2021.3.0.3230_offline.sh -s -a --action install \
+        --components default \
+        --install-dir $INTEL_PATH \
+        --silent --eula accept
 
-# OpenMPI
-mkdir -p $MPI_PATH
-tar -xf openmpi-4.1.1.tar.gz -C $MPI_PATH
-cd $MPI_PATH/openmpi-4.1.1
-./configure --prefix=$MPI_PATH && make && make install
+    # OpenMPI
+    mkdir -p $MPI_PATH
+    tar -xf openmpi-4.1.1.tar.gz -C $MPI_PATH
+    cd $MPI_PATH/openmpi-4.1.1
+    ./configure --prefix=$MPI_PATH && make && make install
 
-# Intel Math Kernel Libraries
-# Instructions: https://software.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-with-command-line.html#install-with-command-line
-# TODO: otimizar. Acho que não preciso de todos os componentes indicados no comando
-$INSTALLATION_FILES_FOLDER/l_BaseKit_p_2021.3.0.3219_offline.sh -s -a --action install \
-    --components intel.oneapi.lin.mkl.devel:intel.oneapi.lin.dpcpp-cpp-compiler:intel.oneapi.lin.tbb.devel:intel.oneapi.lin.ipp.devel:intel.oneapi.lin.ccl.devel \
-    --install-dir $INTEL_PATH \
-    --silent --eula accept
+    # Intel Math Kernel Libraries
+    # Instructions: https://software.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-linux/top/installation/install-with-command-line.html#install-with-command-line
+    # TODO: otimizar. Acho que não preciso de todos os componentes indicados no comando
+    $INSTALLATION_FILES_FOLDER/l_BaseKit_p_2021.3.0.3219_offline.sh -s -a --action install \
+        --components intel.oneapi.lin.mkl.devel:intel.oneapi.lin.dpcpp-cpp-compiler:intel.oneapi.lin.tbb.devel:intel.oneapi.lin.ipp.devel:intel.oneapi.lin.ccl.devel \
+        --install-dir $INTEL_PATH \
+        --silent --eula accept
+fi
 
 # FDS
 # Após a instalação, copie as 3 linhas seguintes para o final do seu ~/.bashrc
