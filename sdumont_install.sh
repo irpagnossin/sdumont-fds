@@ -56,7 +56,8 @@ else
 fi
 
 # FDS
-# Após a instalação, copie as 3 linhas seguintes para o final do seu ~/.bashrc
+# Após a instalação, copie as 3 linhas seguintes para o final do seu
+# ~/.bash_profile (não é o ~/.bashrc)
 export INTEL_COMPILERS_AND_LIBS=$INTEL_PATH
 source $INTEL_COMPILERS_AND_LIBS/setvars.sh
 export MKL_ROOT=$MKLROOT
