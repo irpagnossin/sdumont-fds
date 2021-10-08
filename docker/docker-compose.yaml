@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  fds:
+    build: .
+    volumes:
+      - ./src:/root/fds/src
+    environment:
+      INTEL_COMPILERS_AND_LIBS: /opt/intel/oneapi/
+    container_name: fds_sandbox

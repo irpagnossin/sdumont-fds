@@ -1,5 +1,5 @@
 *.tar.gz
-dependencies/*
+docker/dependencies/*
 fds/
 .obsidian/
 

@@ -1,6 +1,0 @@
-#!/bin/bash
-FDS_SRC=$HOME/Documents/research/incendios_florestais/fds/src
-docker run -d \
-    --name fds_sandbox \
-    --mount "type=bind,source=$FDS_SRC,target=/root/fds/src" \
-    fds_sandbox:0.4.0
